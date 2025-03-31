@@ -1,0 +1,14 @@
+build
+install
+edm4toy/src
+edm4toy/edm4toy
+edm4toy/podio_generated_files.cmake
+.ipynb_checkpoints
+spack/local/.spack-env
+spack/local/spack.lock
+*.root
+*.hdf5
+output
+spack/*/.spack-env
+spack/*/spack.lock
+*/__pycache__
