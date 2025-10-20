@@ -10,9 +10,11 @@
 #include <edm4hep/CaloHitContributionCollection.h>
 #include <edm4toy/SimToyCalorimeterHitCollection.h>
 #include "ToyCaloHit.h"
+
 #include <podio/Frame.h>
-#include <podio/ROOTFrameWriter.h>
 #include <podio/podioVersion.h>
+#include <podio/ROOTWriter.h>
+
 
 namespace dd4hep {
 
@@ -24,7 +26,7 @@ namespace dd4hep {
  
     class Geant4EDM4ToyReadout : public Geant4OutputAction  {
       protected:
-        using writer_t = podio::ROOTFrameWriter;
+        using writer_t = podio::ROOTWriter;
         using stringmap_t = std::map< std::string, std::string >;
         using trackermap_t = std::map< std::string, edm4hep::SimTrackerHitCollection >;
 
@@ -186,7 +188,7 @@ void Geant4EDM4ToyReadout::beginRun(const G4Run* run)  {
     }
   }
   if ( !fname.empty() )   {
-    m_file = std::make_unique<podio::ROOTFrameWriter>(fname);
+    m_file = std::make_unique<podio::ROOTWriter>(fname);
     if ( !m_file )   {
       fatal("+++ Failed to open output file: %s", fname.c_str());
     }
@@ -330,7 +332,6 @@ void Geant4EDM4ToyReadout::saveParticles(Geant4ParticleMap* particles)    {
         mcp.setGeneratorStatus( 0 )  ;
 
       mcp.setSpin(p->spin);
-      mcp.setColorFlow(p->colorFlow);
 
       p_ids[id] = cnt++;
       p_part.push_back(p);
@@ -449,7 +450,7 @@ void Geant4EDM4ToyReadout::saveCollection(OutputContext<G4Event>& /*ctxt*/, G4VH
       sth.setEDep(hit->energyDeposit/CLHEP::GeV);
       sth.setPathLength(hit->length/CLHEP::mm);
       sth.setTime(hit->truth.time/CLHEP::ns);
-      sth.setMCParticle(mcp);
+      sth.setParticle(mcp);
       sth.setPosition( {pos.x()/CLHEP::mm, pos.y()/CLHEP::mm, pos.z()/CLHEP::mm} );
       sth.setMomentum( {float(mom.x()/CLHEP::GeV),float(mom.y()/CLHEP::GeV),float(mom.z()/CLHEP::GeV)} );
       auto particleIt = pm->particles().find(trackID);
@@ -498,6 +499,7 @@ void Geant4EDM4ToyReadout::saveCollection(OutputContext<G4Event>& /*ctxt*/, G4VH
     
     Geant4Sensitive* sd = coll->sensitive();
     int hit_creation_mode = sd->hitCreationMode();
+    (void)hit_creation_mode; // silence if kept for future
 
     auto& hits = m_toycaloHits[colName];
     
